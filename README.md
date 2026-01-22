@@ -6,7 +6,7 @@ An interactive AI-powered image generation tool that helps users transform gener
 - LLM-powered prompt enhancement
 - Interactive tag selection interface
 - Custom prompt options
-- GPT-Image-1 integration
+- GPT-Image-1.5 integration
 - Download generated images
 
 ## Setup
@@ -21,4 +21,4 @@ An interactive AI-powered image generation tool that helps users transform gener
 ## Tech Stack
 - Streamlit
 - OpenAI GPT-4o-mini (prompt analysis)
-- OpenAI GPT-Image-1 (image generation)
+- OpenAI GPT-Image-1.5 (image generation)
