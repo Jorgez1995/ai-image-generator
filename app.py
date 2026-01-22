@@ -5,8 +5,6 @@ from PIL import Image
 import io
 import random
 
-# Custom CSS for prettier buttons - WORKING VERSION
-
 st.markdown(
     """
 <style>
@@ -144,21 +142,7 @@ st.markdown(
     div[data-testid="InputInstructions"] {
     display: none !important;
     }
-    /* Typing animation for placeholder */
-div[data-testid="stTextInput"] > div > div > input::placeholder {
-    overflow: hidden;
-    white-space: nowrap;
-    animation: typing 4s steps(40, end) infinite;
-}
-
-@keyframes typing {
-    0%, 100% {
-        width: 0;
-    }
-    50%, 90% {
-        width: 100%;
-    }
-}
+    
 </style>
 """,
     unsafe_allow_html=True,
@@ -188,14 +172,6 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # Optional: Settings or stats
-    if "suggestions" in st.session_state:
-        st.subheader("📊 Session Stats")
-        st.metric(
-            "Images Generated",
-            len([k for k in st.session_state.keys() if "generated" in k]),
-        )
-
 # ________________________
 
 # Visual demo section
@@ -207,7 +183,6 @@ with col1:
     st.markdown("### Before")
     st.markdown("**Simple prompt:**")
     st.code("dog in a field", language=None)
-    # Add a placeholder image or upload your "before" image
     st.image(
         "assets/before_image.png", caption="Generic result", use_container_width=True
     )
@@ -231,7 +206,6 @@ with col3:
                 "details": "Butterflies, distant mountains, soft grass",
             }
         )
-    # Add your "after" image
     st.image(
         "assets/after_image.png",
         caption="Professional result",
@@ -248,7 +222,6 @@ st.markdown(
 # ________________________
 
 
-# Rotating placeholder examples
 placeholder_examples = [
     "golden retriever playing in snow",
     "photographer capturing sunset over mountains",
@@ -262,7 +235,6 @@ placeholder_examples = [
     "child watching cat reading a book",
 ]
 
-# Generate a consistent placeholder based on session
 if "placeholder_text" not in st.session_state:
     st.session_state.placeholder_text = random.choice(placeholder_examples)
 
@@ -282,7 +254,6 @@ if st.button("Analyze Prompt"):
                 # Store suggestions in session state
                 st.session_state.suggestions = suggestions
                 st.session_state.user_prompt = prompt
-                # Clear previous selections
                 st.session_state.final_prompt = None
             else:
                 st.error("Failed to analyze prompt. Please try again.")
@@ -308,17 +279,14 @@ if "suggestions" in st.session_state:
 
         st.write(f"**{category.title()}:**")
 
-        # Add "Write your own" option
         options_with_custom = options + ["✏️ Write your own"]
 
-        # Check if user has made a selection for this category
         current_selection = st.session_state.get(f"selection_{category}", None)
 
-        # Use index parameter to control default selection
         if current_selection and current_selection in options_with_custom:
             default_index = options_with_custom.index(current_selection)
         else:
-            default_index = None  # No default selection
+            default_index = None
 
         selected = st.radio(
             f"Select {category}:",
@@ -339,7 +307,7 @@ if "suggestions" in st.session_state:
             if custom_value:
                 selections[category] = custom_value
             else:
-                selections[category] = selected  # Keep the "Write your own" marker
+                selections[category] = selected
         else:
             selections[category] = selected
 
@@ -370,7 +338,7 @@ if "suggestions" in st.session_state:
     # Step 3: Build final prompt button
     st.divider()
     if st.button("Build Final Prompt"):
-        # Check if all categories have actual selections (not just defaults)
+        # Check if all categories have actual selections
         categories = list(suggestions.keys())
         missing_selections = [
             cat for cat in categories if not st.session_state.get(f"selection_{cat}")
@@ -395,13 +363,11 @@ if "final_prompt" in st.session_state and st.session_state.final_prompt:
     st.subheader("Your Final Prompt:")
     st.json(st.session_state.final_prompt)
 
-    # Generate image button
     if st.button("Generate Image"):
         with st.spinner("Generating your image... This may take 10-30 seconds."):
             image_bytes, gen_time = generate_image(st.session_state.final_prompt)
 
             if image_bytes:
-                # Convert bytes to PIL Image for display
                 image = Image.open(io.BytesIO(image_bytes))
 
                 st.success(f"✅ Image generated in {gen_time:.2f} seconds!")
@@ -409,7 +375,7 @@ if "final_prompt" in st.session_state and st.session_state.final_prompt:
                     image, caption="Your Generated Image", use_container_width=True
                 )
 
-                # Optional: Download button
+                # Download button
                 st.download_button(
                     label="Download Image",
                     data=image_bytes,

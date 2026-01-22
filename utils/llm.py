@@ -74,7 +74,6 @@ Remember: The subject options should describe both WHO/WHAT and WHAT THEY'RE DOI
         if "style" in suggestions:
             realistic_option = "Photorealistic, high detail, natural colors"
             if realistic_option not in suggestions["style"]:
-                # Insert at the beginning if not present
                 suggestions["style"].insert(0, realistic_option)
 
         return suggestions
@@ -84,7 +83,6 @@ Remember: The subject options should describe both WHO/WHAT and WHAT THEY'RE DOI
         return None
 
 
-# Test function
 if __name__ == "__main__":
     test_prompt = "dog in snow"
     result = analyze_prompt(test_prompt)
@@ -95,7 +93,6 @@ if __name__ == "__main__":
 
         print(json.dumps(result, indent=2))
 
-        # Verify realistic option is there
         if "Photorealistic" in result.get("style", []):
             print("\n✅ Realistic option is present in style!")
         else:

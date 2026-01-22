@@ -27,10 +27,8 @@ Additional details: {prompt_dict['details']}
 Generate a cohesive, high-quality image incorporating all these elements."""
 
     try:
-        # Start timer
         start_time = time.time()
 
-        # Generate image using OpenAI Images API
         response = client.images.generate(
             model="gpt-image-1.5",
             prompt=prompt_text,
@@ -39,13 +37,8 @@ Generate a cohesive, high-quality image incorporating all these elements."""
             n=1,
         )
 
-        # Calculate generation time
         generation_time = time.time() - start_time
-
-        # GPT Image models return base64-encoded images
         image_b64 = response.data[0].b64_json
-
-        # Decode base64 to bytes
         image_bytes = base64.b64decode(image_b64)
 
         return image_bytes, generation_time
@@ -69,7 +62,6 @@ if __name__ == "__main__":
     image_bytes, gen_time = generate_image(test_prompt)
 
     if image_bytes:
-        # Save to file
         with open("test_image2.png", "wb") as f:
             f.write(image_bytes)
         print(f"✅ Image generated in {gen_time:.2f} seconds")
