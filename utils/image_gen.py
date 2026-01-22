@@ -32,7 +32,7 @@ Generate a cohesive, high-quality image incorporating all these elements."""
 
         # Generate image using OpenAI Images API
         response = client.images.generate(
-            model="gpt-image-1",
+            model="gpt-image-1.5",
             prompt=prompt_text,
             size="1024x1024",
             quality="medium",
@@ -58,11 +58,11 @@ Generate a cohesive, high-quality image incorporating all these elements."""
 # Test function
 if __name__ == "__main__":
     test_prompt = {
-        "subject": "a playful golden retriever bounding through the snow",
-        "setting": "a tranquil snowy forest with towering pine trees",
-        "style": "a sharp, hyper-realistic digital illustration",
-        "lighting": "a warm golden sunset casting long shadows on the snow",
-        "details": "paw prints trailing off into the distance",
+        "subject": "a playful golden retriever running through tall grass",
+        "setting": "a sunlit open field with wildflowers",
+        "style": "Photorealistic, high detail, natural colors",
+        "lighting": "bright afternoon sunlight with soft shadows",
+        "details": "dandelions scattered across the field, distant rolling hills",
     }
 
     print("Generating image...")
@@ -70,9 +70,9 @@ if __name__ == "__main__":
 
     if image_bytes:
         # Save to file
-        with open("test_image.png", "wb") as f:
+        with open("test_image2.png", "wb") as f:
             f.write(image_bytes)
         print(f"✅ Image generated in {gen_time:.2f} seconds")
-        print(f"Saved to: test_image.png")
+        print(f"Saved to: test_image2.png")
     else:
         print("❌ Failed to generate image")

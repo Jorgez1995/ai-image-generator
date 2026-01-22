@@ -83,18 +83,38 @@ st.markdown(
         color: white;
         border-color: #FF4B4B;
     }
+    /* Remove outer container styling */
+    div[data-testid="stTextInput"] > div,
+    div[data-testid="stTextInput"] > div > div {
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border-radius: 15px; /* Match the input border-radius */
+    }
     
-    /* Text inputs */
+        /* Text inputs with border color wave */
     div[data-testid="stTextInput"] > div > div > input {
         border-radius: 15px;
         padding: 0.75rem 1.25rem;
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        transition: border-color 0.3s ease;
+        border: 2px solid rgba(255, 75, 75, 0.3);
+        transition: all 0.3s ease;
+        animation: border-wave 2s ease-in-out infinite;
     }
-    
+
+    @keyframes border-wave {
+        0%, 100% {
+            border-color: rgba(255, 75, 75, 0.3);
+        }
+        50% {
+            border-color: rgba(255, 75, 75, 1);
+        }
+    }
+
     div[data-testid="stTextInput"] > div > div > input:focus {
         border-color: #FF4B4B;
-        box-shadow: 0 0 0 2px rgba(255, 75, 75, 0.2);
+        box-shadow: 0 0 0 3px rgba(255, 75, 75, 0.3);
+        background-color: transparent;
     }
     
     /* Category labels */
@@ -120,6 +140,25 @@ st.markdown(
     div[data-testid="stMarkdown"] {
         animation: fadeIn 0.5s ease-in;
     }
+    /* Hide input instructions */
+    div[data-testid="InputInstructions"] {
+    display: none !important;
+    }
+    /* Typing animation for placeholder */
+div[data-testid="stTextInput"] > div > div > input::placeholder {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 4s steps(40, end) infinite;
+}
+
+@keyframes typing {
+    0%, 100% {
+        width: 0;
+    }
+    50%, 90% {
+        width: 100%;
+    }
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -156,22 +195,71 @@ with st.sidebar:
             "Images Generated",
             len([k for k in st.session_state.keys() if "generated" in k]),
         )
-st.title("Create Your Image")
 
-st.write("Welcome! Let's build your custom image.")
+# ________________________
+
+# Visual demo section
+st.subheader("✨ See the Difference")
+
+col1, col2, col3 = st.columns([1, 0.3, 1])
+
+with col1:
+    st.markdown("### Before")
+    st.markdown("**Simple prompt:**")
+    st.code("dog in a field", language=None)
+    # Add a placeholder image or upload your "before" image
+    st.image(
+        "assets/before_image.png", caption="Generic result", use_container_width=True
+    )
+
+with col2:
+    st.markdown(
+        "<div style='text-align: center; font-size: 3rem; margin-top: 100px;'>→</div>",
+        unsafe_allow_html=True,
+    )
+
+with col3:
+    st.markdown("### After")
+    st.markdown("**Enhanced with our tool:**")
+    with st.expander("View detailed prompt", expanded=False):
+        st.json(
+            {
+                "subject": "Golden retriever running joyfully",
+                "setting": "Sunlit meadow with wildflowers",
+                "style": "Photorealistic, high detail, natural colors",
+                "lighting": "Golden hour warm glow",
+                "details": "Butterflies, distant mountains, soft grass",
+            }
+        )
+    # Add your "after" image
+    st.image(
+        "assets/after_image.png",
+        caption="Professional result",
+        use_container_width=True,
+    )
+
+
+st.markdown("---")
+st.markdown(
+    "<h1 style='text-align: center;'>Create Your Image</h1>", unsafe_allow_html=True
+)
+
+
+# ________________________
+
 
 # Rotating placeholder examples
 placeholder_examples = [
-    "dog playing in snow",
-    "sunset over mountains",
-    "cyberpunk city street",
-    "cozy coffee shop interior",
-    "astronaut riding a horse",
-    "magical forest with glowing mushrooms",
-    "vintage car on desert highway",
-    "zen garden with koi pond",
-    "steampunk airship in clouds",
-    "cat reading a book",
+    "golden retriever playing in snow",
+    "photographer capturing sunset over mountains",
+    "woman walking through cyberpunk city street",
+    "barista working in cozy coffee shop interior",
+    "astronaut riding a horse on alien planet",
+    "deer standing in magical forest with glowing mushrooms",
+    "couple driving vintage car on desert highway",
+    "monk meditating in zen garden with koi pond",
+    "pilot navigating steampunk airship through clouds",
+    "child watching cat reading a book",
 ]
 
 # Generate a consistent placeholder based on session
