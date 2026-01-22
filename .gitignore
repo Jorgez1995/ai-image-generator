@@ -12,8 +12,5 @@ dist/
 build/
 .venv/
 venv/
-*.png
-*.jpg
-*.jpeg
 generated_image.*
 test_image.*
