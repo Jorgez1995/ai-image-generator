@@ -10,7 +10,7 @@ An interactive AI-powered image generation tool that helps users transform gener
 - Download generated images
 
 ## Live Demo
-🚀 [Try it live on Hugging Face Spaces](https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME)
+🚀 [Try it live on Hugging Face Spaces](https://jorgez19-imagepromptgenerator.hf.space/)
 
 ## Setup
 

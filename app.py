@@ -220,7 +220,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 with st.sidebar:
-    st.title("🎨 AI Image Generator")
+    st.title("🎨 Image Prompt Optimizer")
     st.markdown("---")
 
     remaining, used, total = get_remaining_generations()
@@ -265,7 +265,7 @@ with col1:
     st.markdown("### Before")
     st.markdown("**Simple prompt:**")
     st.code("dog in a field", language=None)
-    st.image("assets/before_image.png", caption="Generic result", use_column_width=True)
+    st.image("src/assets/before_image.png", caption="Generic result")
 
 with col2:
     st.markdown(
@@ -287,9 +287,8 @@ with col3:
             }
         )
     st.image(
-        "assets/after_image.png",
+        "src/assets/after_image.png",
         caption="Professional result",
-        use_column_width=True,
     )
 
 
@@ -475,7 +474,7 @@ if "final_prompt" in st.session_state and st.session_state.final_prompt:
         st.info(
             f"📊 Generations used today: {st.session_state.generation_count_display}"
         )
-        st.image(image, caption="Your Generated Image", use_column_width=True)
+        st.image(image, caption="Your Generated Image")
 
         st.download_button(
             label="Download Image",
