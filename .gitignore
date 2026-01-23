@@ -14,3 +14,6 @@ build/
 venv/
 generated_image.*
 test_image.*
+rate_limits.db
+rate_limits.db-journal
+rate_limits.json

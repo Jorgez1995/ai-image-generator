@@ -4,6 +4,78 @@ from utils.image_gen import generate_image
 from PIL import Image
 import io
 import random
+from datetime import datetime
+import json
+import os
+import sqlite3
+
+
+# Detect if running on HF Spaces and use persistent storage
+DB_PATH = "/data/rate_limits.db" if os.path.exists("/data") else "rate_limits.db"
+
+
+def init_db():
+    """Initialize SQLite database"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS daily_limits
+        (date TEXT PRIMARY KEY, count INTEGER)
+    """
+    )
+    conn.commit()
+    conn.close()
+
+
+#
+
+
+def check_rate_limit():
+    """Check if user has exceeded daily rate limit"""
+    init_db()
+    max_generations = 15
+    today = datetime.now().date().isoformat()
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("SELECT count FROM daily_limits WHERE date = ?", (today,))
+    result = c.fetchone()
+    current_count = result[0] if result else 0
+
+    if current_count >= max_generations:
+        conn.close()
+        return False, current_count, max_generations
+
+    if result:
+        c.execute("UPDATE daily_limits SET count = count + 1 WHERE date = ?", (today,))
+    else:
+        c.execute("INSERT INTO daily_limits VALUES (?, 1)", (today,))
+
+    conn.commit()
+    conn.close()
+
+    return True, current_count + 1, max_generations
+
+
+def get_remaining_generations():
+    """Get remaining generations for display"""
+    init_db()
+    max_generations = 15
+    today = datetime.now().date().isoformat()
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("SELECT count FROM daily_limits WHERE date = ?", (today,))
+    result = c.fetchone()
+    used = result[0] if result else 0
+
+    conn.close()
+
+    return max_generations - used, used, max_generations
+
 
 st.markdown(
     """
@@ -142,13 +214,23 @@ st.markdown(
     div[data-testid="InputInstructions"] {
     display: none !important;
     }
-    
+
 </style>
 """,
     unsafe_allow_html=True,
 )
 with st.sidebar:
     st.title("🎨 AI Image Generator")
+    st.markdown("---")
+
+    remaining, used, total = get_remaining_generations()
+    st.metric("Global Daily Generations Remaining", f"{remaining}/{total}")
+
+    if remaining <= 3 and remaining > 0:
+        st.warning("⚠️ Running low!")
+    elif remaining == 0:
+        st.error("❌ Limit reached for today")
+
     st.markdown("---")
 
     st.subheader("About")
@@ -183,9 +265,7 @@ with col1:
     st.markdown("### Before")
     st.markdown("**Simple prompt:**")
     st.code("dog in a field", language=None)
-    st.image(
-        "assets/before_image.png", caption="Generic result", use_container_width=True
-    )
+    st.image("assets/before_image.png", caption="Generic result", use_column_width=True)
 
 with col2:
     st.markdown(
@@ -209,7 +289,7 @@ with col3:
     st.image(
         "assets/after_image.png",
         caption="Professional result",
-        use_container_width=True,
+        use_column_width=True,
     )
 
 
@@ -364,23 +444,42 @@ if "final_prompt" in st.session_state and st.session_state.final_prompt:
     st.json(st.session_state.final_prompt)
 
     if st.button("Generate Image"):
-        with st.spinner("Generating your image... This may take 10-30 seconds."):
-            image_bytes, gen_time = generate_image(st.session_state.final_prompt)
+        can_generate, current_count, max_count = check_rate_limit()
 
-            if image_bytes:
-                image = Image.open(io.BytesIO(image_bytes))
+        if not can_generate:
+            st.error(
+                f"⛔ Daily limit reached! You've used all {max_count} generations today. Please try again tomorrow."
+            )
+        else:
+            with st.spinner("Generating your image... This may take 10-30 seconds."):
+                image_bytes, gen_time = generate_image(st.session_state.final_prompt)
 
-                st.success(f"✅ Image generated in {gen_time:.2f} seconds!")
-                st.image(
-                    image, caption="Your Generated Image", use_container_width=True
-                )
+                if image_bytes:
+                    # Store in session state so it persists after rerun
+                    st.session_state.generated_image = image_bytes
+                    st.session_state.generation_time = gen_time
+                    st.session_state.generation_count_display = (
+                        f"{current_count}/{max_count}"
+                    )
+                    st.rerun()  # ADD THIS LINE
+                else:
+                    st.error("Failed to generate image. Please try again.")
 
-                # Download button
-                st.download_button(
-                    label="Download Image",
-                    data=image_bytes,
-                    file_name="generated_image.png",
-                    mime="image/png",
-                )
-            else:
-                st.error("Failed to generate image. Please try again.")
+    # Display generated image if it exists in session state
+    if "generated_image" in st.session_state:
+        image = Image.open(io.BytesIO(st.session_state.generated_image))
+
+        st.success(
+            f"✅ Image generated in {st.session_state.generation_time:.2f} seconds!"
+        )
+        st.info(
+            f"📊 Generations used today: {st.session_state.generation_count_display}"
+        )
+        st.image(image, caption="Your Generated Image", use_column_width=True)
+
+        st.download_button(
+            label="Download Image",
+            data=st.session_state.generated_image,
+            file_name="generated_image.png",
+            mime="image/png",
+        )
